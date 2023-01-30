@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, Float
+from sqlalchemy import Column, Integer, String, Float, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
+
 
 Base = declarative_base()
 class Product(Base):
@@ -27,6 +28,7 @@ class Client(Base):
     client_end = Column(String(200), nullable=False)
     client_cel = Column(String(125), nullable=False)
     client_mail = Column(String(125), nullable=False)
+
     def __init__(self,client_name,client_uf,client_city,client_end,client_cel,client_mail):
         self.client_name = client_name
         self.client_uf = client_uf
@@ -35,3 +37,13 @@ class Client(Base):
         self.client_cel = client_cel
         self.client_mail = client_mail
     
+class Order(Base):
+    __tablename__ = 'orders'
+
+    order_id = Column(Integer, autoincrement=True, primary_key=True)
+    order_product_id = Column(Integer, nullable=False)
+    order_client_id = Column(Integer, nullable=False)
+
+    def __init__(self,order_product_id,order_client_id):
+        self.order_product_id = order_product_id
+        self.order_client_id = order_client_id

@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 import os
 import utils as u
 #from werkzeug.utils import secure_filename
-from db import Product, Client
+from db import Product, Client, Order
 from config import settings as s
 
 #
