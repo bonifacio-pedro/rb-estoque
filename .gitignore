@@ -1,2 +1,4 @@
 /env
 /static/img/upload
+.secrets.*
+/settings.toml

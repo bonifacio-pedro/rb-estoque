@@ -5,16 +5,16 @@ import os
 import utils as u
 #from werkzeug.utils import secure_filename
 from db import Product, Client
+from config import settings as s
 
 #
 # Constantes
 #
 app = Flask(__name__)
-engine = create_engine('mysql+mysqldb://root:45093988rgftqj@localhost/sys_estoque_rb', pool_recycle=3600)
+engine = create_engine(s.DB_CONNECTION, pool_recycle=3600)
 Session = sessionmaker(bind=engine)
 session = Session()
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'static/img/upload') # Onde salvar as imagens
-
 
 #
 # Clientes
@@ -95,8 +95,6 @@ def deletar(id):
     session.delete(product)
     session.commit()
     return redirect(url_for('produtos'))
-
-
         #
         # Atualizações de estoque
         #
