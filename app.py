@@ -60,6 +60,16 @@ def edit_clientes_post(id):
         session.commit()
         return redirect(url_for('clientes'))
 #
+# Clientes - deletar
+#
+@app.route('/clientes/deletar/<id>')
+def delete_cliente(id):
+    cliente = session.query(Client).get(id)
+    session.delete(cliente)
+    session.commit()
+    return redirect(url_for('clientes'))
+
+#
 # Produtos
 #
 @app.route('/produtos')
@@ -81,7 +91,7 @@ def add_produtos_post():
         product = Product(int(request.form['cod']),request.form['name'],request.form['desc'],int(request.form['qntd']),float(u.retorna_float_valor(request.form['val'])))
         print(float(u.retorna_float_valor(request.form['val'])))
         img = request.files['arq'] # Requisito a imagem do upload # Salvo um caminho com o nome da imagem
-        img.save(u.caminho_imagem(UPLOAD_FOLDER,img.filename)) # Salvo imagem
+        img.save(u.caminho_imagem(UPLOAD_FOLDER,request.form['name']+'.png')) # Salvo imagem
         session.add(product) # Adiciono o produto
         session.commit()
         return redirect(url_for('produtos'))
