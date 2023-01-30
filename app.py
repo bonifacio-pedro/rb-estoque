@@ -4,36 +4,20 @@ from sqlalchemy.orm import sessionmaker
 import os
 import utils as u
 #from werkzeug.utils import secure_filename
-from db import Product, Client, Order
+from db import Product, Client
 from config import settings as s
+from datetime import datetime
 
 #
 # Constantes
 #
 app = Flask(__name__)
+app.secret_key = s.SECRET_KEY
 engine = create_engine(s.DB_CONNECTION, pool_recycle=3600)
 Session = sessionmaker(bind=engine)
 session = Session()
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'static/img/upload/') # Onde salvar as imagens
 
-#
-# Pedidos
-#
-@app.route('/pedidos')
-def pedidos():
-    return render_template('pedidos.html')
-@app.route('/pedidos/cadastrar')
-def add_pedido():
-    products = session.query(Product).all()
-    clients = session.query(Client).all()
-    data = {"products" : products, "clients": clients}
-    return render_template('add_pedido.html', data=data)
-@app.route('/pedidos/cadastrar_2', methods=['POST'])
-def add_pedido_post():
-    if request.method == 'POST':
-        product = session.query(Product).get(request.form['product'])
-        return render_template('add_pedidos_2.html',product=product)
-    pass
 #
 # Clientes
 #
