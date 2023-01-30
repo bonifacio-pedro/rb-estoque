@@ -4,14 +4,61 @@ from sqlalchemy.orm import sessionmaker
 import os
 import utils as u
 #from werkzeug.utils import secure_filename
-from db import Product
+from db import Product, Client
 
+#
+# Constantes
+#
 app = Flask(__name__)
 engine = create_engine('mysql+mysqldb://root:45093988rgftqj@localhost/sys_estoque_rb', pool_recycle=3600)
 Session = sessionmaker(bind=engine)
 session = Session()
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'static/img/upload') # Onde salvar as imagens
 
+
+#
+# Clientes
+#
+@app.route('/clientes')
+def clientes():
+    clients = session.query(Client).all()
+    return render_template('clientes.html', clients=clients)
+#
+# Clientes - Adicionar
+#
+@app.route('/clientes/cadastrar')
+def add_clientes():
+    return render_template('add_clientes.html')
+@app.route('/clientes/cadastrar', methods=['POST'])
+def add_clientes_post():
+    if request.method == 'POST':
+        # adicionar normal, nada a comentar
+        client = Client(request.form['client_name'],request.form['client_uf'],request.form['client_city'],request.form['client_end'],request.form['client_cel'],request.form['client_mail'])
+        session.add(client)
+        session.commit()
+        return redirect(url_for('clientes'))
+#
+# Clientes - Editar
+#
+@app.route('/clientes/editar/<id>')
+def edit_cliente(id):
+    client = session.query(Client).get(id)
+                # Primeiro fazemos uma query para pegar o cliente, e setar os valores do input para uma edição mais simples
+    return render_template('edit_cliente.html', client=client)
+@app.route('/clientes/editar/<id>', methods=['GET','POST'])
+def edit_clientes_post(id):
+    client = session.query(Client).get(id)
+    if request.method == 'POST':
+        # Deve existir outra maneira de corrigir isso, ou melhor, fazer com menos linhas
+        # * a corrigir
+        client.client_name = request.form['client_name']
+        client.client_uf = request.form['client_uf']
+        client.client_city = request.form['client_city']
+        client.client_end = request.form['client_end']
+        client.client_cel = request.form['client_cel']
+        client.client_mail= request.form['client_mail']
+        session.commit()
+        return redirect(url_for('clientes'))
 #
 # Produtos
 #
@@ -19,14 +66,12 @@ UPLOAD_FOLDER = os.path.join(os.getcwd(), 'static/img/upload') # Onde salvar as 
 def produtos():
     products = session.query(Product).all() # Query geral
     return render_template('produtos.html', products=products)
-
 #
 # Produtos - Cadastrar
 #    
 @app.route('/produtos/cadastrar')
 def add_produtos():
     return render_template('add_produtos.html')
-
 @app.route('/produtos/cadastrar', methods=['POST'])
 def add_produtos_post():
     if request.method == 'POST':
@@ -34,12 +79,12 @@ def add_produtos_post():
         Faço uma verificação se tem . ou , para voltar como float comum.
         """
         product = Product(int(request.form['cod']),request.form['name'],request.form['desc'],int(request.form['qntd']),float(u.retorna_float_valor(request.form['val'])))
+        print(float(u.retorna_float_valor(request.form['val'])))
         img = request.files['arq'] # Requisito a imagem do upload # Salvo um caminho com o nome da imagem
         img.save(u.caminho_imagem(UPLOAD_FOLDER,img.filename)) # Salvo imagem
         session.add(product) # Adiciono o produto
         session.commit()
         return redirect(url_for('produtos'))
-
 #
 # Produtos - Deletar, diminuir e aumentar estoque
 #
@@ -51,6 +96,10 @@ def deletar(id):
     session.commit()
     return redirect(url_for('produtos'))
 
+
+        #
+        # Atualizações de estoque
+        #
 @app.route('/produtos/ame/<id>')
 def aumentar_estoque(id):
     # Aumento o estoque do produto em 1
@@ -58,7 +107,6 @@ def aumentar_estoque(id):
     product.product_qntd += 1
     session.commit()
     return redirect(url_for('produtos'))
-
 @app.route('/produtos/dme/<id>')
 def diminuir_estoque(id):
     # Diminuo o estoque do produto em 1
@@ -69,7 +117,6 @@ def diminuir_estoque(id):
         return redirect(url_for('produtos'))
     else:
         return redirect(url_for('produtos'))
-
 #
 # App
 #
