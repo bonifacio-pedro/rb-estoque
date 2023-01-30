@@ -14,8 +14,26 @@ app = Flask(__name__)
 engine = create_engine(s.DB_CONNECTION, pool_recycle=3600)
 Session = sessionmaker(bind=engine)
 session = Session()
-UPLOAD_FOLDER = os.path.join(os.getcwd(), 'static/img/upload') # Onde salvar as imagens
+UPLOAD_FOLDER = os.path.join(os.getcwd(), 'static/img/upload/') # Onde salvar as imagens
 
+#
+# Pedidos
+#
+@app.route('/pedidos')
+def pedidos():
+    return render_template('pedidos.html')
+@app.route('/pedidos/cadastrar')
+def add_pedido():
+    products = session.query(Product).all()
+    clients = session.query(Client).all()
+    data = {"products" : products, "clients": clients}
+    return render_template('add_pedido.html', data=data)
+@app.route('/pedidos/cadastrar_2', methods=['POST'])
+def add_pedido_post():
+    if request.method == 'POST':
+        product = session.query(Product).get(request.form['product'])
+        return render_template('add_pedidos_2.html',product=product)
+    pass
 #
 # Clientes
 #
@@ -89,7 +107,7 @@ def add_produtos_post():
         Faço uma verificação se tem . ou , para voltar como float comum.
         """
         product = Product(int(request.form['cod']),request.form['name'],request.form['desc'],int(request.form['qntd']),float(u.retorna_float_valor(request.form['val'])))
-        print(float(u.retorna_float_valor(request.form['val'])))
+        print(str(u.retorna_float_valor(request.form['val'])))
         img = request.files['arq'] # Requisito a imagem do upload # Salvo um caminho com o nome da imagem
         img.save(u.caminho_imagem(UPLOAD_FOLDER,request.form['name']+'.png')) # Salvo imagem
         session.add(product) # Adiciono o produto
@@ -103,6 +121,7 @@ def deletar(id):
     # Delete comum
     product = session.query(Product).get(id)
     session.delete(product)
+    os.remove("{}{}".format(UPLOAD_FOLDER, product.product_name + '.png')) # Deletando arquivo junto
     session.commit()
     return redirect(url_for('produtos'))
         #

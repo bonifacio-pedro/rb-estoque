@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime
 from sqlalchemy.ext.declarative import declarative_base
-
+from datetime import datetime
 
 Base = declarative_base()
 class Product(Base):
@@ -41,9 +41,15 @@ class Order(Base):
     __tablename__ = 'orders'
 
     order_id = Column(Integer, autoincrement=True, primary_key=True)
-    order_product_id = Column(Integer, nullable=False)
+    order_cod = Column(Integer, nullable=False)
+    order_date = Column(DateTime, default=datetime.utcnow(), nullable=False)
+    order_frete = Column(Float, nullable=False)
+    order_finalprice = Column(Float, nullable=False)
     order_client_id = Column(Integer, nullable=False)
+    order_product_id = Column(Integer, nullable=False)
 
-    def __init__(self,order_product_id,order_client_id):
-        self.order_product_id = order_product_id
-        self.order_client_id = order_client_id
+    def __init__(self,order_cod,order_date,order_frete,order_finalprice):
+        self.order_cod = order_cod
+        self.order_date = order_date
+        self.order_frete = order_frete
+        self.order_finalprice = order_finalprice
